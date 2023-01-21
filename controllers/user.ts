@@ -1,24 +1,37 @@
-import informationUser from "../models/informacionUser";
-import modelUser from "../models/user";
-import { INFORMATIONUSER, USER } from "../types";
-const bcrypt = require("bcryptjs");
-export interface ParamsBody {
-  user: USER;
-  informationOfUser: INFORMATIONUSER;
+import { Prisma, User } from "@prisma/client";
+import { client } from "../client";
+
+interface InformationParams {
+  user: User;
+  information: Prisma.UserInformationCreateWithoutIdUserInput;
+
+  userAddres: Prisma.UserAddressCreateInput;
 }
-export const createUser = async (body: ParamsBody) => {
-  const { user, informationOfUser } = body as any;
-  if (user && informationOfUser) {
-    const salt = bcrypt.genSaltSync(10);
-    const pswd = await bcrypt.hash(body.user.password, salt);
-    user.password = "" + pswd;
-    const newUser = await modelUser.create(user);
-    const newInfdoramtion = await informationUser.create(informationOfUser);
-    return { status: 200, message: "Creado Correctamente", data: newUser };
-  } else {
-    return {
-      status: 403,
-      message: "Peticion Invalida por falta de entrada de datos",
-    };
-  }
+export const CreateUser = async (allInformation: InformationParams) => {
+  const { information, user, userAddres } = allInformation;
+  const { city, country, createdAt, department, directions } = userAddres;
+  const { email, password } = user;
+  const { lastName, name, dateOfBirth } = information;
+  return await client.user.create({
+    data: {
+      email: email,
+      password,
+      information: {
+        create: {
+          lastName,
+          name,
+          dateOfBirth,
+        },
+      },
+
+      users_address: {
+        create: {
+          city,
+          country,
+          department,
+          directions,
+        },
+      },
+    },
+  });
 };
