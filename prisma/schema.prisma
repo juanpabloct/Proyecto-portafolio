@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//Information of the Directions
 model UserAddress {
   id         Int       @id @default(autoincrement())
   country    String?   @db.VarChar(255)
@@ -20,17 +21,24 @@ model UserAddress {
   User   User @relation(fields: [userId], references: [id])
 }
 
+//All Infromation User
 model UserInformation {
-  id          Int       @id @default(autoincrement())
-  name        String    @db.VarChar(255)
-  lastName    String    @db.VarChar(255)
-  dateOfBirth DateTime  @db.Timestamptz(6)
-  createdAt   DateTime? @default(now())
-  updatedAt   DateTime? @updatedAt
-  userId      Int       @unique
-  User        User      @relation(fields: [userId], references: [id])
+  id                          Int                           @id @default(autoincrement())
+  name                        String?                       @db.VarChar(255)
+  lastName                    String?                       @db.VarChar(255)
+  dateOfBirth                 DateTime?                     @db.Timestamptz(6)
+  createdAt                   DateTime?                     @default(now())
+  updatedAt                   DateTime?                     @updatedAt
+  userId                      Int                           @unique
+  linkProfilesId              Int
+  linkProfilesFK              LinkProfiles                  @relation(fields: [linkProfilesId], references: [id])
+  User                        User                          @relation(fields: [userId], references: [id])
+  NewLink                     NewLink[]
+  TecnologiesAssociateProject TecnologiesAssociateProject[]
+  ProjectsUser                ProjectsUser[]
 }
 
+//Information of the login
 model User {
   id            Int               @id @default(autoincrement())
   email         String            @unique @db.VarChar(255)
@@ -41,4 +49,47 @@ model User {
   users_address UserAddress[]
 
   @@unique([email, password])
+}
+
+//Models For the links how Linkedin, Computrabajo, GitHub  
+model NewLink {
+  id                Int             @id @default(autoincrement())
+  UserInformationId Int             @unique
+  userId            UserInformation @relation(fields: [UserInformationId], references: [userId])
+  LinkProfiles      LinkProfiles[]
+}
+
+model LinkProfiles {
+  id              Int               @id @default(autoincrement())
+  url             String?
+  newLinkId       Int?
+  newLinkFk       NewLink?          @relation(fields: [newLinkId], references: [id])
+  UserInformation UserInformation[]
+}
+
+//Models of the tecnologies of the user
+
+model TecnologiesAssociateProject {
+  id                Int              @id @default(autoincrement())
+  UserInformation   UserInformation? @relation(fields: [userInformationId], references: [id])
+  userInformationId Int?
+  Tecnologies       Tecnologies?     @relation(fields: [tecnologiesId], references: [id])
+  tecnologiesId     Int?
+  projectsUserId    Int?
+  ProjectsUserFk    ProjectsUser?    @relation(fields: [projectsUserId], references: [id])
+}
+
+model ProjectsUser {
+  id                            Int                           @id @default(autoincrement())
+  name                          String
+  userInformationId             Int?
+  UserInformation               UserInformation?              @relation(fields: [userInformationId], references: [id])
+  tecnologiesAssociateProjectId Int?
+  TecnologiesAssociateProject   TecnologiesAssociateProject[]
+}
+
+model Tecnologies {
+  id                          Int                           @id @default(autoincrement())
+  name                        String
+  TecnologiesAssociateProject TecnologiesAssociateProject[]
 }
