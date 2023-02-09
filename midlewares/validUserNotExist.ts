@@ -7,7 +7,7 @@ export const ValidUserNotExist = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { email } = req.body;
+  const { email } = req.body.user;
   const verifyClient = await client.user.findUnique({
     where: { email },
   });
