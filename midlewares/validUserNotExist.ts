@@ -12,7 +12,7 @@ export const ValidUserNotExist = async (
     where: { email },
   });
   if (verifyClient) {
-    res.status(400).json("Usuario ya existe");
+    res.status(400).json({ error: "Usuario ya existe" });
   } else {
     next();
   }
