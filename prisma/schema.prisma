@@ -16,9 +16,7 @@ model UserAddress {
   directions String?   @db.VarChar(255)
   createdAt  DateTime? @default(now())
   updatedAt  DateTime? @updatedAt
-
-  userId Int
-  User   User @relation(fields: [userId], references: [id])
+  User       User[]
 }
 
 //All Infromation User
@@ -30,25 +28,36 @@ model UserInformation {
   createdAt                   DateTime?                     @default(now())
   updatedAt                   DateTime?                     @updatedAt
   userId                      Int                           @unique
-  linkProfilesId              Int
-  linkProfilesFK              LinkProfiles                  @relation(fields: [linkProfilesId], references: [id])
+  linkProfiles                LinkProfiles[]
   User                        User                          @relation(fields: [userId], references: [id])
   NewLink                     NewLink[]
   TecnologiesAssociateProject TecnologiesAssociateProject[]
-  ProjectsUser                ProjectsUser[]
+  Projects                    ProjectsUser[]
 }
 
 //Information of the login
 model User {
-  id            Int               @id @default(autoincrement())
-  email         String            @unique @db.VarChar(255)
-  password      String            @db.VarChar(255)
-  createdAt     DateTime?         @default(now())
-  updatedAt     DateTime?         @updatedAt
-  information   UserInformation[]
-  users_address UserAddress[]
+  id            Int              @id @default(autoincrement())
+  email         String           @unique @db.VarChar(255)
+  password      String           @db.VarChar(255)
+  createdAt     DateTime?        @default(now())
+  updatedAt     DateTime?        @updatedAt
+  information   UserInformation?
+  users_address UserAddress?     @relation(fields: [userAddressId], references: [id])
+  userAddressId Int?
+  photo         Photo?           @relation(fields: [photoId], references: [id])
+  photoId       Int?
 
   @@unique([email, password])
+}
+
+model Photo {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  url    String
+  User   User[]
+
+  @@unique([userId])
 }
 
 //Models For the links how Linkedin, Computrabajo, GitHub  
@@ -60,11 +69,12 @@ model NewLink {
 }
 
 model LinkProfiles {
-  id              Int               @id @default(autoincrement())
-  url             String?
-  newLinkId       Int?
-  newLinkFk       NewLink?          @relation(fields: [newLinkId], references: [id])
-  UserInformation UserInformation[]
+  id                Int             @id @default(autoincrement())
+  url               String?
+  newLinkId         Int?
+  newLinkFk         NewLink?        @relation(fields: [newLinkId], references: [id])
+  user              UserInformation @relation(fields: [userInformationId], references: [id])
+  userInformationId Int
 }
 
 //Models of the tecnologies of the user
@@ -73,8 +83,8 @@ model TecnologiesAssociateProject {
   id                Int              @id @default(autoincrement())
   UserInformation   UserInformation? @relation(fields: [userInformationId], references: [id])
   userInformationId Int?
-  Tecnologies       Tecnologies?     @relation(fields: [tecnologiesId], references: [id])
-  tecnologiesId     Int?
+  Tecnology         Tecnology?       @relation(fields: [tecnologyId], references: [id])
+  tecnologyId       Int?
   projectsUserId    Int?
   ProjectsUserFk    ProjectsUser?    @relation(fields: [projectsUserId], references: [id])
 }
@@ -88,8 +98,10 @@ model ProjectsUser {
   TecnologiesAssociateProject   TecnologiesAssociateProject[]
 }
 
-model Tecnologies {
+model Tecnology {
   id                          Int                           @id @default(autoincrement())
   name                        String
   TecnologiesAssociateProject TecnologiesAssociateProject[]
+
+  @@map("Tecnologies")
 }
