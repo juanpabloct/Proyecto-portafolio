@@ -61,7 +61,6 @@ app.post("/login/addPhoto", async (req: Request, res) => {
         Bucket: data.Bucket,
         Key: data.key,
       });
-      client.photo.create({ data: { url, userId } });
       res.status(200).json({
         mesagges: `Subido en la ruta ${url}`,
       });
