@@ -25,29 +25,24 @@ export const LoginUser = async (body: Prisma.UserCreateInput) => {
       users_address: true,
     },
   });
-  return new Promise((resolved, rejected) => {
-    try {
-      if (user) {
-        const passwordEncypt = user?.password;
-        const verificacion =
-          passwordEncypt && verifyPassword(password, passwordEncypt);
-        if (!verificacion)
-          throw { error: "Error la contraseña no es valida", status: 404 };
-        return resolved(
-          user && {
-            token: userGenerateToken({ user }),
-            user: {
-              information: user.information[0],
-              users_address: user.users_address[0],
-              email: user.email,
-            },
-          }
-        );
-      } else {
-        throw { error: "Usuario no Existe", status: 400 };
-      }
-    } catch (error: any) {
-      return rejected(error);
+  try {
+    if (user) {
+      const passwordEncypt = user?.password;
+      const verificacion = verifyPassword(password, passwordEncypt);
+      if (!verificacion)
+        throw { error: "Error la contraseña no es valida", status: 404 };
+      return {
+        token: userGenerateToken({ user }),
+        user: {
+          information: user?.information,
+          users_address: user?.users_address,
+          email: user?.email,
+        },
+      };
+    } else {
+      throw { error: "Usuario no Existe", status: 400 };
     }
-  });
+  } catch (error: any) {
+    return new Error(error);
+  }
 };
