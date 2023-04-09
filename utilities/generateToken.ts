@@ -1,4 +1,5 @@
-import { Prisma, User } from "@prisma/client";
+import { User } from "@prisma/client";
+import { FIRMA } from "../config";
 
 const jwt = require("jsonwebtoken");
 export const userGenerateToken = ({ user }: { user: User }) =>
@@ -6,6 +7,6 @@ export const userGenerateToken = ({ user }: { user: User }) =>
     {
       data: user,
     },
-    process.env.FIRMA,
+    FIRMA,
     { expiresIn: "1d" }
   );
