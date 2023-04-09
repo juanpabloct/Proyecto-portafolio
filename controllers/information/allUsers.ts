@@ -10,6 +10,12 @@ export const allUsers = async () => {
       updatedAt: true,
       information: true,
       users_address: true,
+      Photo: {
+        select: {
+          key: true,
+          id: true,
+        },
+      },
     },
   });
   return datosUsuario;
