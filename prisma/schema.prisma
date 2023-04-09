@@ -45,19 +45,16 @@ model User {
   information   UserInformation?
   users_address UserAddress?     @relation(fields: [userAddressId], references: [id])
   userAddressId Int?
-  photo         Photo?           @relation(fields: [photoId], references: [id])
-  photoId       Int?
+  Photo         Photo?           @relation(fields: [photoId], references: [id])
+  photoId       Int?             @unique
 
   @@unique([email, password])
 }
 
 model Photo {
-  id     Int    @id @default(autoincrement())
-  userId Int
-  url    String
-  User   User[]
-
-  @@unique([userId])
+  id   Int    @id @default(autoincrement())
+  key  String
+  User User?
 }
 
 //Models For the links how Linkedin, Computrabajo, GitHub  
