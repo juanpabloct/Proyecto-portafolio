@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { Prisma } from "@prisma/client";
 import { client } from "../client";
 
 export const ValidUserNotExist = async (
@@ -7,7 +6,7 @@ export const ValidUserNotExist = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { email } = req.body.user;
+  const { email } = JSON.parse(req.body.user);
   const verifyClient = await client.user.findUnique({
     where: { email },
   });
