@@ -1,7 +1,7 @@
 import { Prisma, User } from "@prisma/client";
 import { client } from "../../client";
 import { EncryptPassword } from "../../utilities/encriptPassword";
-import { haveValues } from "../../utilities/haveValues";
+import { awsS3FileUpload } from "../../utilities/awsS3FileUpload";
 
 interface InformationParams {
   user: User;
@@ -9,63 +9,35 @@ interface InformationParams {
 
   userAddres: Prisma.UserAddressCreateInput;
 }
-export const CreateUser = async (allInformation: InformationParams) => {
-  const { information, user, userAddres } = allInformation;
+export const CreateUser = async (allInformation, image) => {
+  let { information, user, userAddres } = allInformation;
+  information = JSON.parse(information);
+  user = JSON.parse(user);
+  userAddres = JSON.parse(userAddres);
   const { email, password } = user;
-  const haveValuesInformation = haveValues(information as {});
-  const haveValuesUserAddres = haveValues(userAddres as {});
   const psswdEncrypt = EncryptPassword(password);
   try {
-    if (haveValuesInformation && haveValuesUserAddres) {
-      return await client.user.create({
-        data: {
-          email: email,
-          password: psswdEncrypt,
-          information: {
-            create: {
-              ...information,
-            },
-          },
-
-          users_address: {
-            create: {
-              ...userAddres,
-            },
+    return await client.user.create({
+      data: {
+        email: email,
+        password: psswdEncrypt,
+        information: {
+          create: {
+            ...information,
           },
         },
-      });
-    } else if (!haveValuesInformation && haveValuesUserAddres) {
-      return await await client.user.create({
-        data: {
-          email: email,
-          password: psswdEncrypt,
-          users_address: {
-            create: {
-              ...userAddres,
-            },
+        users_address: {
+          create: {
+            ...userAddres,
           },
         },
-      });
-    } else if (haveValuesInformation && !haveValuesUserAddres) {
-      return await client.user.create({
-        data: {
-          email: email,
-          password: psswdEncrypt,
-          information: {
-            create: {
-              ...information,
-            },
+        Photo: {
+          create: {
+            key: await awsS3FileUpload({ file: image, key: email }),
           },
         },
-      });
-    } else {
-      return await client.user.create({
-        data: {
-          email: email,
-          password: psswdEncrypt,
-        },
-      });
-    }
+      },
+    });
   } catch (error: any) {
     return new Error(error);
   }
